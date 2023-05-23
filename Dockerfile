@@ -1,19 +1,32 @@
-FROM ubuntu:22.04
+FROM node:lts-bullseye
 
 ARG DOCKER_GID=999
 
-# Install dependencies
+# Install dependencies 
 RUN apt-get update && \
     apt-get install -y curl && \
+    apt-get install -y wget && \
+    apt-get install -y unzip && \
+    apt-get install -y vim && \
+    apt-get install -y build-essential && \
+    apt-get install -y libssl-dev && \
+    apt-get install -y libffi-dev && \
+    apt-get install -y python3 && \
+    apt-get install -y python3-venv && \
+    apt-get install -y python3-dev && \
+    apt-get install -y python3-pip && \
     apt-get install -y git && \
+    apt-get install -y sudo && \
     apt-get install -y jq && \
     apt-get install -y iputils-ping && \
     apt-get install -y apt-transport-https && \
+    apt-get install -y gnupg && \
+    apt-get install -y lsb-release && \
     apt-get install -y ca-certificates && \
     apt-get install -y gnupg-agent && \
     apt-get install -y software-properties-common && \
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
-    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" && \
+    curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null && \
     apt-get update && \
     apt-get install -y docker-ce-cli
 
@@ -21,8 +34,13 @@ RUN apt-get update && \
 RUN groupadd -g ${DOCKER_GID} docker
 
 # Add user
-RUN useradd -m -d /home/runner -s /bin/bash runner && \
-    usermod -aG docker runner
+RUN useradd -m -d /home/vscode -s /bin/bash vscode && \
+    usermod -aG docker vscode
+# Set permissions
+RUN echo "vscode ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+WORKDIR /home/vscode
+RUN mkdir -p /home/vscode/work
+RUN chown -R vscode /usr/local
 
 # Install GitHub runner
 RUN mkdir actions-runner && \
@@ -33,8 +51,10 @@ RUN mkdir actions-runner && \
     ./bin/installdependencies.sh
 
 WORKDIR actions-runner
-RUN chown -R runner .
-USER runner
+COPY --chown=vscode:vscode runner.bash .
+RUN sudo chmod +x runner.bash
+RUN chown -R vscode /home/vscode
+USER vscode
 
 # Start runner
-CMD ./config.sh --url $REPOSITORY_URL --token $ACCESS_TOKEN --name $RUNNER_NAME --work $WORK_DIRECTORY --labels $LABELS && ./run.sh
+CMD ./runner.bash

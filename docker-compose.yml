@@ -6,11 +6,12 @@ services:
       context: .
     container_name: github-runner
     environment:
-      REPOSITORY_URL: ${REPOSITORY_URL}
-      ACCESS_TOKEN: ${ACCESS_TOKEN}
+      GH_OWNER: ${GH_OWNER}
+      GH_REPOSITORY: ${GH_REPOSITORY}
+      GH_TOKEN: ${GH_TOKEN}
       RUNNER_NAME: ${RUNNER_NAME}
       WORK_DIRECTORY: ${WORK_DIRECTORY}
       LABELS: ${LABELS}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    restart: unless-stopped
+    
