@@ -4,7 +4,7 @@ services:
   github-runner:
     build:
       context: .
-    container_name: github-runner
+    container_name: github-runner-interpreter
     restart: unless-stopped
     environment:
       GH_OWNER: ${GH_OWNER}
