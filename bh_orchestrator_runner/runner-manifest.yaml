@@ -12,7 +12,16 @@ metadata:
   name: github-runner-orchestrator-role
 rules:
 - apiGroups: [""]
-  resources: ["pods", "pods/exec", "pods/log", "services", "deployments", "secrets"]
+  resources: ["pods", "pods/exec", "pods/log", "services", "secrets", "serviceaccounts", "nodes"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["networking.k8s.io"]
+  resources: ["ingresses"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["roles", "rolebindings"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
 ---
@@ -68,14 +77,15 @@ spec:
             value: "/home/vscode/work"  # Optional: Working directory
           - name: LABELS
             value: "ubuntu,self-hosted,omen-ubuntu"  # Optional: Labels for the runner
+          - name: DOCKER_HOST
+            value: "tcp://192.168.85.2:2376"
+          - name: DOCKER_CERT_PATH  # This is for using docker daemon from kubectl
+            value: "/home/vscode/.minikube/certs"  
+          - name: DOCKER_TLS_VERIFY
+            value: "1"  
+          - name: MINIKUBE_ACTIVE_DOCKERD
+            value: "minikube"  
         resources:
           limits:
             cpu: "1"
             memory: "1Gi"
-      volumes:
-        - name: docker-sock
-          hostPath:
-            path: /var/run/docker.sock
-        - name: kube-config
-          hostPath:
-            path: /home/david/.kube/config  # Adjust this path based on where your kubeconfig is located
