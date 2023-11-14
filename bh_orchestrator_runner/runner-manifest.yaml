@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: github-runner-orchestrator-service-account
+  namespace: default
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: default
+  name: github-runner-orchestrator-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/exec", "pods/log", "services", "deployments", "secrets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: github-runner-orchestrator-rolebinding
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: github-runner-orchestrator-service-account
+  namespace: default
+roleRef:
+  kind: Role
+  name: github-runner-orchestrator-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: github-runner-orchestrator
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: github-runner-orchestrator
+  template:
+    metadata:
+      labels:
+        app: github-runner-orchestrator
+    spec:
+      serviceAccountName: github-runner-orchestrator-service-account
+      containers:
+      - name: github-runner-orchestrator
+        image: github-runner-orchestrator  # Replace with your Docker image name
+        imagePullPolicy: IfNotPresent
+        # command: ["/bin/sh", "-c", "sleep infinity"]  # Delete
+        env:
+          - name: GH_OWNER
+            value: "ButlerHat"  # Replace with your GitHub username or organization
+          - name: GH_REPOSITORY
+            value: "orchestrator-butlerhat"  # Replace with your repository name
+          - name: GH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: github-token  # Replace with your Kubernetes secret for GitHub token
+                key: token
+          - name: RUNNER_NAME
+            value: "omen-ubuntu"  # Optional: Give your runner a name
+          - name: WORK_DIRECTORY
+            value: "/home/vscode/work"  # Optional: Working directory
+          - name: LABELS
+            value: "ubuntu,self-hosted,omen-ubuntu"  # Optional: Labels for the runner
+        resources:
+          limits:
+            cpu: "1"
+            memory: "1Gi"
+      volumes:
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+        - name: kube-config
+          hostPath:
+            path: /home/david/.kube/config  # Adjust this path based on where your kubeconfig is located
