@@ -66,6 +66,7 @@ RUN echo "alias python=python3" >> ~/.bashrc
 
 # Copy certs and config to 
 COPY certs /home/vscode/.minikube/certs
+RUN sudo chown -R vscode:vscode /home/vscode/.minikube
 
 # Start runner
 CMD ./runner.bash
