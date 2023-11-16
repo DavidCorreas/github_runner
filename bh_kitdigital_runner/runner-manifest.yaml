@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: github-runner-orchestrator-service-account
+  name: github-runner-kitdigital-service-account
   namespace: default
 
 ---
@@ -42,11 +42,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: github-runner-orchestrator-rolebinding
+  name: github-runner-kitdigital-rolebinding
   namespace: default
 subjects:
 - kind: ServiceAccount
-  name: github-runner-orchestrator-service-account
+  name: github-runner-kitdigital-service-account
   namespace: default
 roleRef:
   kind: Role
@@ -61,7 +61,7 @@ metadata:
   name: node-reader-binding
 subjects:
 - kind: ServiceAccount
-  name: github-runner-orchestrator-service-account
+  name: github-runner-kitdigital-service-account
   namespace: default
 roleRef:
   kind: ClusterRole
@@ -72,29 +72,29 @@ roleRef:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: github-runner-orchestrator
+  name: github-runner-kitdigital
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: github-runner-orchestrator
+      app: github-runner-kitdigital
   template:
     metadata:
       labels:
-        app: github-runner-orchestrator
+        app: github-runner-kitdigital
     spec:
-      serviceAccountName: github-runner-orchestrator-service-account
+      serviceAccountName: github-runner-kitdigital-service-account
       containers:
-      - name: github-runner-orchestrator
-        image: github-runner-orchestrator  # Replace with your Docker image name
+      - name: github-runner-kitdigital
+        image: github-runner-kitdigital  # Replace with your Docker image name
         imagePullPolicy: IfNotPresent
         # command: ["/bin/sh", "-c", "sleep infinity"]  # Delete
         env:
           - name: GH_OWNER
             value: "ButlerHat"  # Replace with your GitHub username or organization
           - name: GH_REPOSITORY
-            value: "orchestrator-butlerhat"  # Replace with your repository name
+            value: "KitDigital"  # Replace with your repository name
           - name: GH_TOKEN
             valueFrom:
               secretKeyRef:
