@@ -12,7 +12,7 @@ metadata:
   name: github-runner-role
 rules:
 - apiGroups: [""]
-  resources: ["pods", "pods/exec", "pods/log", "services", "secrets", "serviceaccounts", "nodes"]
+  resources: ["pods", "pods/exec", "pods/log", "services", "secrets", "serviceaccounts", "nodes", "persistentvolumeclaims"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 - apiGroups: ["apps"]
   resources: ["deployments"]
@@ -32,7 +32,7 @@ metadata:
   name: node-reader
 rules:
 - apiGroups: [""]
-  resources: ["nodes"]
+  resources: ["nodes", "persistentvolumes"]
   verbs: ["get", "list", "watch"]
 - apiGroups: ["rbac.authorization.k8s.io"]
   resources: ["clusterroles", "clusterrolebindings"]
