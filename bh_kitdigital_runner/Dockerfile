@@ -65,7 +65,7 @@ USER vscode
 RUN echo "alias python=python3" >> ~/.bashrc
 
 # Copy certs and config to 
-COPY certs /home/vscode/.minikube/certs
+COPY --chown=vscode:vscode certs /home/vscode/.minikube/certs
 
 # Start runner
 CMD ./runner.bash
